@@ -1,18 +1,52 @@
-const express    = require('express');
-const jwt        = require('jsonwebtoken');
-const rateLimit  = require('express-rate-limit');
-const router     = express.Router();
-const adminAuth  = require('../middleware/adminAuth');
-const Insight    = require('../models/Insight');
-const TeamMember = require('../models/TeamMember');
+const express      = require('express');
+const jwt          = require('jsonwebtoken');
+const rateLimit    = require('express-rate-limit');
+const mongoose     = require('mongoose');
+const XSS          = require('xss');
+const router       = express.Router();
+const adminAuth    = require('../middleware/adminAuth');
+const Insight      = require('../models/Insight');
+const TeamMember   = require('../models/TeamMember');
 const PracticeArea = require('../models/PracticeArea');
-const Inquiry    = require('../models/Inquiry');
+const Inquiry      = require('../models/Inquiry');
 
-// Stricter rate limit for login
+// ── Helpers ───────────────────────────────────────────────────
+const ALLOWED_CATEGORIES = [
+  'Corporate Law', 'Litigation', 'Regulatory Affairs',
+  'Intellectual Property', 'Real Estate', 'Corporate Governance',
+];
+
+// Whitelist-only HTML sanitizer for insight body
+const bodyFilter = new XSS.FilterXSS({
+  whiteList: {
+    h2: [], h3: [], p: [], ul: [], li: [],
+    div: ['class'],
+  },
+  stripIgnoreTag: true,
+  stripIgnoreTagBody: ['script', 'style', 'iframe', 'object'],
+});
+
+function sanitizeBody(html) {
+  if (!html || typeof html !== 'string') return '';
+  return bodyFilter.process(html);
+}
+
+function isValidId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+// ── Rate limits ───────────────────────────────────────────────
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { message: 'Too many login attempts. Please try again later.' },
+});
+
+// Applies to all write operations after auth
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { message: 'Too many requests. Please slow down.' },
 });
 
 // ── Auth ──────────────────────────────────────────────────────
@@ -32,102 +66,157 @@ router.post('/login', loginLimiter, (req, res) => {
 
 // All routes below require a valid token
 router.use(adminAuth);
+router.use(writeLimiter);
 
 // ── Insights ──────────────────────────────────────────────────
 router.get('/insights', async (req, res) => {
   try {
     res.json(await Insight.find().sort({ publishedAt: -1 }));
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('GET /admin/insights:', err);
+    res.status(500).json({ message: 'Failed to fetch insights.' });
+  }
 });
 
 router.post('/insights', async (req, res) => {
+  if (req.body.category && !ALLOWED_CATEGORIES.includes(req.body.category)) {
+    return res.status(400).json({ message: 'Invalid category.' });
+  }
   try {
-    const doc = await Insight.create(req.body);
+    const payload = { ...req.body, body: sanitizeBody(req.body.body) };
+    const doc = await Insight.create(payload);
     res.status(201).json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('POST /admin/insights:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.put('/insights/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
+  if (req.body.category && !ALLOWED_CATEGORIES.includes(req.body.category)) {
+    return res.status(400).json({ message: 'Invalid category.' });
+  }
   try {
-    const doc = await Insight.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const payload = { ...req.body, body: sanitizeBody(req.body.body) };
+    const doc = await Insight.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('PUT /admin/insights/:id:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.delete('/insights/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     await Insight.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted.' });
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('DELETE /admin/insights/:id:', err);
+    res.status(500).json({ message: 'Failed to delete.' });
+  }
 });
 
 // ── Team ──────────────────────────────────────────────────────
 router.get('/team', async (req, res) => {
   try {
     res.json(await TeamMember.find().sort({ order: 1 }));
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('GET /admin/team:', err);
+    res.status(500).json({ message: 'Failed to fetch team.' });
+  }
 });
 
 router.post('/team', async (req, res) => {
   try {
     const doc = await TeamMember.create(req.body);
     res.status(201).json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('POST /admin/team:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.put('/team/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     const doc = await TeamMember.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('PUT /admin/team/:id:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.delete('/team/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     await TeamMember.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted.' });
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('DELETE /admin/team/:id:', err);
+    res.status(500).json({ message: 'Failed to delete.' });
+  }
 });
 
 // ── Practice Areas ────────────────────────────────────────────
 router.get('/practice-areas', async (req, res) => {
   try {
     res.json(await PracticeArea.find().sort({ order: 1 }));
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('GET /admin/practice-areas:', err);
+    res.status(500).json({ message: 'Failed to fetch practice areas.' });
+  }
 });
 
 router.post('/practice-areas', async (req, res) => {
   try {
     const doc = await PracticeArea.create(req.body);
     res.status(201).json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('POST /admin/practice-areas:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.put('/practice-areas/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     const doc = await PracticeArea.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
-  } catch (err) { res.status(400).json({ message: err.message }); }
+  } catch (err) {
+    console.error('PUT /admin/practice-areas/:id:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.delete('/practice-areas/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     await PracticeArea.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted.' });
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('DELETE /admin/practice-areas/:id:', err);
+    res.status(500).json({ message: 'Failed to delete.' });
+  }
 });
 
 // ── Inquiries ─────────────────────────────────────────────────
 router.get('/inquiries', async (req, res) => {
   try {
     res.json(await Inquiry.find().sort({ createdAt: -1 }));
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('GET /admin/inquiries:', err);
+    res.status(500).json({ message: 'Failed to fetch inquiries.' });
+  }
 });
 
 router.patch('/inquiries/:id/status', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   const { status } = req.body;
   if (!['new', 'read', 'replied'].includes(status)) {
     return res.status(400).json({ message: 'Invalid status.' });
@@ -136,14 +225,21 @@ router.patch('/inquiries/:id/status', async (req, res) => {
     const doc = await Inquiry.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('PATCH /admin/inquiries/:id/status:', err);
+    res.status(500).json({ message: 'Failed to update status.' });
+  }
 });
 
 router.delete('/inquiries/:id', async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
   try {
     await Inquiry.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted.' });
-  } catch { res.status(500).json({ message: 'Failed.' }); }
+  } catch (err) {
+    console.error('DELETE /admin/inquiries/:id:', err);
+    res.status(500).json({ message: 'Failed to delete.' });
+  }
 });
 
 module.exports = router;

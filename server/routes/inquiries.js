@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
       name: validator.escape(name.trim()),
       email: validator.normalizeEmail(email) || email.toLowerCase().trim(),
       practiceArea,
-      message: message.trim(),
+      message: validator.escape(message.trim()),
     });
     res.status(201).json({ message: 'Inquiry submitted successfully.', id: inquiry._id });
   } catch (err) {

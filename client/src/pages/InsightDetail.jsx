@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { apiFetch } from '../utils/api';
 import { useInView } from '../hooks/useInView';
 import './InsightDetail.css';
+
+const PURIFY_CONFIG = {
+  ALLOWED_TAGS: ['h2', 'h3', 'p', 'ul', 'li', 'div'],
+  ALLOWED_ATTR: ['class'],
+};
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -80,7 +86,7 @@ export default function InsightDetail() {
           {insight.body && (
             <div
               className="insight-detail__body"
-              dangerouslySetInnerHTML={{ __html: insight.body }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(insight.body, PURIFY_CONFIG) }}
             />
           )}
 

@@ -12,10 +12,12 @@ const insightSchema = new mongoose.Schema(
     tags:        [{ type: String }],
     imageUrl:    { type: String },
     imageAlt:    { type: String },
-    publishedAt: { type: Date, default: Date.now },
+    publishedAt: { type: Date, default: Date.now, index: true },
     slug:        { type: String, required: true, unique: true },
   },
   { timestamps: true }
 );
+
+insightSchema.index({ category: 1, publishedAt: -1 });
 
 module.exports = mongoose.model('Insight', insightSchema);
