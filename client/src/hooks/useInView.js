@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 /**
  * Returns [ref, isInView].
- * Once the element enters the viewport it stays "in view" (animates once).
+ *
+ * Uses a callback ref instead of useRef so the observer is attached
+ * correctly even when the target element is conditionally rendered —
+ * the callback fires the moment the element enters the DOM.
  */
 export function useInView(options = {}) {
-  const ref = useRef(null);
   const [isInView, setIsInView] = useState(false);
 
-  useEffect(() => {
-    const el = ref.current;
+  const ref = useCallback((el) => {
     if (!el) return;
 
     const observer = new IntersectionObserver(
@@ -23,8 +24,7 @@ export function useInView(options = {}) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return [ref, isInView];
 }
