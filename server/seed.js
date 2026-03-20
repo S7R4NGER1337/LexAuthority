@@ -284,6 +284,90 @@ const insights = [
     slug: 'esg-reporting-2025',
   },
   {
+    category: 'Real Estate',
+    title: 'Commercial Lease Restructuring: Navigating the Post-2024 Market',
+    excerpt: 'How landlords and tenants are renegotiating lease terms in response to shifting occupancy patterns and the rise of flexible workspace models.',
+    author: 'Robert Chen',
+    authorTitle: 'Counsel, Real Estate',
+    readTime: '5 Min Read',
+    tags: ['Leases', 'Commercial Property', 'Restructuring'],
+    body: `
+<h2>The Structural Shift in Commercial Occupancy</h2>
+<p>The commercial real estate sector is undergoing a structural recalibration. Hybrid working patterns, accelerated by the pandemic and now institutionalised by corporate policy, have permanently altered the demand profile for Grade A office space. Tenants are negotiating shorter terms, break clauses, and fit-out contributions as standard — requirements that landlords must now accommodate or risk prolonged voids.</p>
+<p>For legal practitioners, this shift has generated a surge in lease re-gear mandates. The tension between institutional landlord expectations and occupier flexibility requirements is being resolved, deal by deal, at the negotiating table.</p>
+<div class="callout">
+  <h3>Key Negotiating Points in 2024 Re-Gears</h3>
+  <ul>
+    <li>Break clause timing and conditions — typically at years three and five of longer terms.</li>
+    <li>Landlord contributions to fit-out amortised against extended lease commitments.</li>
+    <li>Turnover rent structures linked to actual occupancy and revenue performance.</li>
+  </ul>
+</div>
+<h2>Legal Implications for Landlords</h2>
+<p>Landlords accepting shorter terms must carefully consider the impact on asset valuation and financing covenants. Lenders with WAULT-based covenant tests may require consent before agreeing to terms below a defined weighted average unexpired lease length. Proactive engagement with lenders before heads of terms are agreed remains essential.</p>
+    `.trim(),
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCtUpel5W0hOSiDu9q1G1y6AryWFbxlDLma0SEnbMYSxvuWovVE1uA8OBuLJRbt8el0hU_EPP3XNQUhIjjqR_ggXeH1G0YuWS_us5P-e-SoD_JbWHe_GhdrHAz-ZTgNwDWzuCFRgVxyWnTAQfqWNVvpVOX3WKpNP9gCn7G0qmgLtpw8ltKTOzudR_1JQrVaPi_wt_sbjRC-SKXmHyqGwdm7JbrowtS2oRI8TLkR4aFa74RiDNrG1bAuTkmPC21bUyb7XQgafmgU8g',
+    imageAlt: 'Modern glass office tower reflecting the city skyline',
+    publishedAt: new Date('2024-03-18'),
+    slug: 'commercial-lease-restructuring-2024',
+  },
+  {
+    category: 'Corporate Law',
+    title: 'Private Credit Ascendancy: Legal Frameworks for Non-Bank Lending',
+    excerpt: 'As private credit funds displace traditional bank lenders in leveraged finance, counsel must master the evolving documentation standards and regulatory expectations.',
+    author: 'Marcus Sterling',
+    authorTitle: 'Senior Partner, Corporate Litigation',
+    readTime: '7 Min Read',
+    tags: ['Private Credit', 'Leveraged Finance', 'Corporate Law'],
+    body: `
+<h2>The Rise of the Direct Lender</h2>
+<p>Private credit has emerged as one of the most significant structural shifts in corporate finance over the past decade. With banks constrained by capital requirements and risk appetite, non-bank lenders — credit funds, BDCs, and insurance-linked vehicles — have filled the void. In the European mid-market, direct lending now accounts for the majority of new leveraged buyout financings by volume.</p>
+<p>For corporate counsel, this shift demands fluency in a new documentation landscape. Direct lending transactions typically use bilateral or club documentation rather than syndicated loan agreements, giving lenders significantly more control over amendment and waiver mechanics.</p>
+<div class="callout">
+  <h3>Documentation Differences: Direct Lending vs. Syndicated</h3>
+  <ul>
+    <li>Tighter covenant packages with maintenance tests rather than incurrence-only structures.</li>
+    <li>Lender consent thresholds typically require unanimous or supermajority approval for material changes.</li>
+    <li>PIK toggle provisions and equity cure rights negotiated deal by deal rather than market-standard.</li>
+  </ul>
+</div>
+<h2>Regulatory Horizon</h2>
+<p>European regulators are increasingly focused on the systemic risk implications of private credit growth. ESMA and national competent authorities are developing enhanced reporting frameworks for credit funds. Borrowers should expect lenders to pass compliance costs through documentation, and counsel advising on new facilities should build regulatory change provisions into long-term credit agreements.</p>
+    `.trim(),
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBSTZWpOnlpeFs3R2V7Cl1KtJeaF0Rdmm6K9yyKKVV3gQ7jkogwx7EkID51ae4zLrTvoMh4F3GE34IASwNsVvtwwroVg_4DAOsMksSGVOQB7QeAQPceMeLBWe8lSE1JQP3ZyWmh_ipzRdjKCHltvA5uOVI10JlhECfekJb3FeqQi8jPdYBAJtAm8xgB1PbiL5GUb7pj5wFgeH4du8BrA7oLvUCrNZS5f3OZgetDgwqjs8620GsNnjEyI8d22DxscQw2GqpLbRLOcg',
+    imageAlt: 'Close-up of law books in a formal library setting',
+    publishedAt: new Date('2024-03-10'),
+    slug: 'private-credit-legal-frameworks',
+  },
+  {
+    category: 'Regulatory Affairs',
+    title: 'Digital Markets Act: Platform Liability in the New Regulatory Order',
+    excerpt: 'The DMA fundamentally reframes the legal obligations of gatekeeper platforms. General counsels at technology companies must urgently recalibrate their compliance posture.',
+    author: 'Amara Okafor',
+    authorTitle: 'Associate, Employment Law',
+    readTime: '6 Min Read',
+    tags: ['DMA', 'Platform Regulation', 'Technology'],
+    body: `
+<h2>Gatekeepers Under Scrutiny</h2>
+<p>The Digital Markets Act came into full force in March 2024, designating six major technology platforms as "gatekeepers" subject to a new set of ex ante obligations. Unlike competition law, which requires regulators to demonstrate harm before intervening, the DMA imposes structural obligations proactively — prohibiting self-preferencing, mandating interoperability, and requiring data portability as baseline requirements.</p>
+<p>For in-house teams at gatekeeper companies, the compliance challenge is enormous in scope. Many of the DMA's obligations require changes to core product architecture, data governance frameworks, and commercial arrangements with third-party developers and business users.</p>
+<div class="callout">
+  <h3>Core DMA Obligations for Designated Gatekeepers</h3>
+  <ul>
+    <li>Prohibition on ranking own products and services more favourably than competing offerings.</li>
+    <li>Mandatory interoperability with third-party messaging services for core communication platforms.</li>
+    <li>Data portability obligations enabling business users to transfer data to alternative platforms.</li>
+  </ul>
+</div>
+<h2>Strategic Implications for Non-Gatekeeper Firms</h2>
+<p>The DMA's impact extends beyond designated gatekeepers. Businesses that operate within gatekeeper ecosystems — as app developers, advertisers, or marketplace sellers — gain new rights to challenge unfair platform practices and access data previously withheld. Legal teams should assess which DMA obligations their platform partners are now subject to and how to leverage these rights in commercial negotiations.</p>
+    `.trim(),
+    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA05ngTaZX4EpN3cN_SweJ0M3QqCSb6dmGQPBV7MVNZaS5JmV6XS2JbG6-zojA52Ene-y-TTuejfqkfZLGUosyib_eXSw5AFf7gK_FvgheIGi_hZLvjrb6N81NcNnSiIojjHtUarTT1GwllyWOpq5Xrczxl-015wpbBmdHfncl5dBfmK-Jh-FbMCk1UB5W9kJ5hrc5sO8EzEAJQkqHGZGRCON_I8otzEe7YfpECXsLan-INsCtACC9QwRHyFgaKdcEueOswZgeX-Q',
+    imageAlt: 'Stately stone columns of a financial institution',
+    publishedAt: new Date('2024-03-05'),
+    slug: 'digital-markets-act-platform-liability',
+  },
+  {
     category: 'Corporate Governance',
     title: 'Fiduciary Duties in the Era of Shareholder Activism',
     excerpt: 'Analyzing the evolving legal responsibilities of board members when facing high-pressure activist investor campaigns.',

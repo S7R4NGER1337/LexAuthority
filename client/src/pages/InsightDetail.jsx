@@ -37,9 +37,10 @@ export default function InsightDetail() {
     apiFetch(`/api/insights/${slug}`)
       .then((data) => {
         setInsight(data);
-        return apiFetch(`/api/insights?category=${encodeURIComponent(data.category)}`);
+        const params = new URLSearchParams({ category: data.category, limit: 4 });
+        return apiFetch(`/api/insights?${params}`);
       })
-      .then((all) => setRelated(all.filter((i) => i.slug !== slug).slice(0, 3)))
+      .then(({ data: all }) => setRelated(all.filter((i) => i.slug !== slug).slice(0, 3)))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [slug]);

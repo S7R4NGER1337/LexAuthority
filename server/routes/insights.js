@@ -11,7 +11,7 @@ const ALLOWED_CATEGORIES = [
   'Corporate Governance',
 ];
 
-// GET /api/insights
+// GET /api/insights?page=1&limit=6&category=X
 router.get('/', async (req, res) => {
   try {
     const filter = {};
@@ -21,8 +21,17 @@ router.get('/', async (req, res) => {
       }
       filter.category = req.query.category;
     }
-    const insights = await Insight.find(filter).sort({ publishedAt: -1 });
-    res.json(insights);
+
+    const limit = Math.min(24, Math.max(1, parseInt(req.query.limit) || 6));
+    const page  = Math.max(1, parseInt(req.query.page) || 1);
+    const skip  = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      Insight.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+      Insight.countDocuments(filter),
+    ]);
+
+    res.json({ data, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     console.error('Insights fetch error:', err);
     res.status(500).json({ message: 'Failed to fetch insights.' });

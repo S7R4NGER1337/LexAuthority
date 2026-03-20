@@ -5,6 +5,7 @@ import { apiFetch } from '../utils/api';
 import './Insights.css';
 
 const CATEGORIES = ['All Insights', 'Corporate Law', 'Litigation', 'Regulatory Affairs', 'Intellectual Property'];
+const LIMIT = 6;
 
 function formatDate(iso) {
   return new Date(iso)
@@ -13,25 +14,41 @@ function formatDate(iso) {
 }
 
 export default function Insights() {
-  const [insights, setInsights] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
-  const [activeCategory, setActiveCategory] = useState('All Insights');
+  const [insights, setInsights]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
+  const [activeCategory, setCategory] = useState('All Insights');
+  const [page, setPage]               = useState(1);
+  const [totalPages, setTotalPages]   = useState(1);
 
-  const [gridRef, gridVisible]   = useInView({ threshold: 0.05 });
+  const [gridRef,  gridVisible]  = useInView({ threshold: 0.05 });
   const [pagerRef, pagerVisible] = useInView();
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const url = activeCategory === 'All Insights'
-      ? '/api/insights'
-      : `/api/insights?category=${encodeURIComponent(activeCategory)}`;
-    apiFetch(url)
-      .then(setInsights)
+
+    const params = new URLSearchParams({ page, limit: LIMIT });
+    if (activeCategory !== 'All Insights') params.set('category', activeCategory);
+
+    apiFetch(`/api/insights?${params}`)
+      .then(({ data, pages }) => {
+        setInsights(data);
+        setTotalPages(pages);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [activeCategory]);
+  }, [page, activeCategory]);
+
+  function handleCategory(cat) {
+    setCategory(cat);
+    setPage(1);
+  }
+
+  function handlePage(p) {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   return (
     <main className="insights-page container">
@@ -50,7 +67,7 @@ export default function Insights() {
           <button
             key={cat}
             className={`insights-filter__btn${activeCategory === cat ? ' insights-filter__btn--active' : ''}`}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => handleCategory(cat)}
           >
             {cat}
           </button>
@@ -86,24 +103,42 @@ export default function Insights() {
         </section>
       )}
 
-      <div
-        ref={pagerRef}
-        className={`insights-pagination anim anim--fade ${pagerVisible ? 'is-visible' : ''}`}
-      >
-        <button className="insights-pagination__btn" disabled>
-          <span className="material-symbols-outlined">chevron_left</span>
-          Previous
-        </button>
-        <div className="insights-pagination__pages">
-          <span className="insights-pagination__page insights-pagination__page--active">1</span>
-          <span className="insights-pagination__page">2</span>
-          <span className="insights-pagination__page">3</span>
+      {!loading && !error && totalPages > 1 && (
+        <div
+          ref={pagerRef}
+          className={`insights-pagination anim anim--fade ${pagerVisible ? 'is-visible' : ''}`}
+        >
+          <button
+            className="insights-pagination__btn"
+            disabled={page === 1}
+            onClick={() => handlePage(page - 1)}
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+            Previous
+          </button>
+
+          <div className="insights-pagination__pages">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <span
+                key={p}
+                className={`insights-pagination__page${p === page ? ' insights-pagination__page--active' : ''}`}
+                onClick={() => handlePage(p)}
+              >
+                {p}
+              </span>
+            ))}
+          </div>
+
+          <button
+            className="insights-pagination__btn"
+            disabled={page === totalPages}
+            onClick={() => handlePage(page + 1)}
+          >
+            Next
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
-        <button className="insights-pagination__btn">
-          Next
-          <span className="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
+      )}
     </main>
   );
 }
