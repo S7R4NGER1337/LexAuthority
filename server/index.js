@@ -53,6 +53,7 @@ app.use('/api/insights',       require('./routes/insights'));
 app.use('/api/team',           require('./routes/team'));
 app.use('/api/practice-areas', require('./routes/practiceAreas'));
 app.use('/api/inquiries',      inquiryLimiter, require('./routes/inquiries'));
+app.use('/api/admin',          require('./routes/admin'));
 
 // ── 404 handler ──────────────────────────────────────────────
 app.use((req, res) => {
