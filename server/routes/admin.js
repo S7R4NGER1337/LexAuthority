@@ -33,22 +33,6 @@ router.post('/login', loginLimiter, (req, res) => {
 // All routes below require a valid token
 router.use(adminAuth);
 
-// ── Stats ─────────────────────────────────────────────────────
-router.get('/stats', async (req, res) => {
-  try {
-    const [insights, team, practiceAreas, inquiries, newInquiries] = await Promise.all([
-      Insight.countDocuments(),
-      TeamMember.countDocuments(),
-      PracticeArea.countDocuments(),
-      Inquiry.countDocuments(),
-      Inquiry.countDocuments({ status: 'new' }),
-    ]);
-    res.json({ insights, team, practiceAreas, inquiries, newInquiries });
-  } catch {
-    res.status(500).json({ message: 'Failed to fetch stats.' });
-  }
-});
-
 // ── Insights ──────────────────────────────────────────────────
 router.get('/insights', async (req, res) => {
   try {

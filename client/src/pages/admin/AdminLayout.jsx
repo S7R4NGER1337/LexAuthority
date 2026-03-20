@@ -2,11 +2,10 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import './admin.css';
 
 const NAV = [
-  { to: '/admin',                end: true,  icon: 'dashboard',  label: 'Dashboard'       },
-  { to: '/admin/insights',       end: false, icon: 'article',    label: 'Insights'        },
-  { to: '/admin/team',           end: false, icon: 'group',      label: 'Team'            },
-  { to: '/admin/practice-areas', end: false, icon: 'gavel',      label: 'Practice Areas'  },
-  { to: '/admin/inquiries',      end: false, icon: 'mail',       label: 'Inquiries'       },
+  { to: '/admin/insights',       icon: 'article',    label: 'Insights'        },
+  { to: '/admin/team',           icon: 'group',      label: 'Team'            },
+  { to: '/admin/practice-areas', icon: 'gavel',      label: 'Practice Areas'  },
+  { to: '/admin/inquiries',      icon: 'mail',       label: 'Inquiries'       },
 ];
 
 export default function AdminLayout() {
@@ -23,11 +22,10 @@ export default function AdminLayout() {
         <div className="adm-sidebar__brand">LexAuthority</div>
 
         <nav className="adm-nav">
-          {NAV.map(({ to, end, icon, label }) => (
+          {NAV.map(({ to, icon, label }) => (
             <NavLink
               key={to}
               to={to}
-              end={end}
               className={({ isActive }) =>
                 `adm-nav__link${isActive ? ' adm-nav__link--active' : ''}`
               }

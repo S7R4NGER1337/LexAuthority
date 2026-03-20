@@ -13,7 +13,6 @@ import Contact        from './pages/Contact';
 // Admin pages
 import AdminLogin         from './pages/admin/AdminLogin';
 import AdminLayout        from './pages/admin/AdminLayout';
-import AdminDashboard     from './pages/admin/AdminDashboard';
 import AdminInsights      from './pages/admin/AdminInsights';
 import AdminTeam          from './pages/admin/AdminTeam';
 import AdminPracticeAreas from './pages/admin/AdminPracticeAreas';
@@ -49,7 +48,7 @@ export default function App() {
             </RequireAdmin>
           }
         >
-          <Route index                 element={<AdminDashboard />} />
+          <Route index                 element={<Navigate to="/admin/insights" replace />} />
           <Route path="insights"       element={<AdminInsights />} />
           <Route path="team"           element={<AdminTeam />} />
           <Route path="practice-areas" element={<AdminPracticeAreas />} />
