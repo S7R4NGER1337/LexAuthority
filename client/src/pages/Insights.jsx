@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useInView } from '../hooks/useInView';
 import './Insights.css';
 
 const CATEGORIES = ['All Insights', 'Corporate Law', 'Litigation', 'Regulatory Affairs', 'Intellectual Property'];
@@ -12,6 +13,9 @@ export default function Insights() {
   const [insights, setInsights] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All Insights');
 
+  const [gridRef, gridVisible]   = useInView({ threshold: 0.05 });
+  const [pagerRef, pagerVisible] = useInView();
+
   useEffect(() => {
     const url = activeCategory === 'All Insights'
       ? '/api/insights'
@@ -24,17 +28,19 @@ export default function Insights() {
 
   return (
     <main className="insights-page container">
-      {/* Header */}
+      {/* Header — above fold */}
       <header className="insights-header">
-        <h1 className="insights-header__title">Insights &amp; Legal Perspectives</h1>
-        <p className="insights-header__lead">
+        <h1 className="insights-header__title hero-anim hero-anim-1">
+          Insights &amp; Legal Perspectives
+        </h1>
+        <p className="insights-header__lead hero-anim hero-anim-2">
           Critical analysis on evolving regulatory landscapes, global market trends, and
           precedent-setting judicial developments.
         </p>
       </header>
 
       {/* Filter */}
-      <nav className="insights-filter">
+      <nav className="insights-filter hero-anim hero-anim-3">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
@@ -47,9 +53,13 @@ export default function Insights() {
       </nav>
 
       {/* Grid */}
-      <section className="insights-grid">
-        {insights.map((item) => (
-          <article key={item._id} className="insight-card">
+      <section className="insights-grid" ref={gridRef}>
+        {insights.map((item, i) => (
+          <article
+            key={item._id}
+            className={`insight-card anim ${gridVisible ? 'is-visible' : ''}`}
+            style={{ '--anim-delay': `${i * 80}ms` }}
+          >
             <div className="insight-card__image">
               <img src={item.imageUrl} alt={item.imageAlt} />
             </div>
@@ -66,8 +76,11 @@ export default function Insights() {
         ))}
       </section>
 
-      {/* Pagination placeholder */}
-      <div className="insights-pagination">
+      {/* Pagination */}
+      <div
+        ref={pagerRef}
+        className={`insights-pagination anim anim--fade ${pagerVisible ? 'is-visible' : ''}`}
+      >
         <button className="insights-pagination__btn" disabled>
           <span className="material-symbols-outlined">chevron_left</span>
           Previous

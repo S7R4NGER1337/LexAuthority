@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useInView } from '../hooks/useInView';
 import './Home.css';
 
 const HERO_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGaRu6n1Ej07sgPAPad6_DnwyRCvHX81wX2gwYUT0FxaQ4VimpuHxMUusgotcL9xLQoEYO_XgQeTtG6LxaxTE1z3_Evlt3HJnnWw1hwxtyG6iEst1tXu1CrmRhyggM6RyEFxpHpNzY9a-QNlRlJ6GO_JQvwi5tsr21Bd2cF8PGF9gUDO266IXQ-oYVYlEhxrGkf4WTOUZKVTXeaPmgFxom4derOhWL2z6lnEn5zoTEufFvpXcctjB3h3f7msegonH2EhT7z2K0Dg';
@@ -16,6 +17,12 @@ export default function Home() {
   const [areas, setAreas] = useState([]);
   const navigate = useNavigate();
 
+  // Scroll observers
+  const [statsRef, statsVisible]   = useInView();
+  const [areasRef, areasVisible]   = useInView();
+  const [aboutRef, aboutVisible]   = useInView();
+  const [sectionRef, sectionVisible] = useInView();
+
   useEffect(() => {
     fetch('/api/practice-areas')
       .then((r) => r.json())
@@ -25,20 +32,25 @@ export default function Home() {
 
   return (
     <main>
-      {/* ── Hero ── */}
+      {/* ── Hero (above fold — CSS animation) ── */}
       <section className="home-hero section-pad-lg">
         <div className="container home-hero__inner">
           <div className="home-hero__text">
-            <h1 className="home-hero__title">Your Trusted Legal Partner</h1>
-            <p className="home-hero__body">
+            <h1 className="home-hero__title hero-anim hero-anim-1">
+              Your Trusted Legal Partner
+            </h1>
+            <p className="home-hero__body hero-anim hero-anim-2">
               Providing sophisticated legal solutions for complex challenges. Our heritage of
               excellence ensures your interests are protected with precision and integrity.
             </p>
-            <button className="btn-primary home-hero__cta" onClick={() => navigate('/contact')}>
+            <button
+              className="btn-primary home-hero__cta hero-anim hero-anim-3"
+              onClick={() => navigate('/contact')}
+            >
               Book a Consultation
             </button>
           </div>
-          <div className="home-hero__image">
+          <div className="home-hero__image hero-anim-img">
             <img src={HERO_IMG} alt="Modern professional law office boardroom" />
           </div>
         </div>
@@ -47,9 +59,13 @@ export default function Home() {
       {/* ── Stats ── */}
       <section className="home-stats section-pad">
         <div className="container">
-          <div className="home-stats__grid">
-            {STATS.map((s) => (
-              <div key={s.label} className="home-stats__item">
+          <div className="home-stats__grid" ref={statsRef}>
+            {STATS.map((s, i) => (
+              <div
+                key={s.label}
+                className={`home-stats__item anim ${statsVisible ? 'is-visible' : ''}`}
+                style={{ '--anim-delay': `${i * 100}ms` }}
+              >
                 <span className="home-stats__value">{s.value}</span>
                 <span className="home-stats__label">{s.label}</span>
               </div>
@@ -61,13 +77,20 @@ export default function Home() {
       {/* ── Practice Areas ── */}
       <section className="section-pad">
         <div className="container">
-          <div className="section-header">
+          <div
+            ref={sectionRef}
+            className={`section-header anim ${sectionVisible ? 'is-visible' : ''}`}
+          >
             <h2 className="section-title">Core Practice Areas</h2>
             <div className="section-rule"></div>
           </div>
-          <div className="home-areas__grid">
-            {areas.slice(0, 6).map((area) => (
-              <div key={area._id} className="home-area-card">
+          <div className="home-areas__grid" ref={areasRef}>
+            {areas.slice(0, 6).map((area, i) => (
+              <div
+                key={area._id}
+                className={`home-area-card anim ${areasVisible ? 'is-visible' : ''}`}
+                style={{ '--anim-delay': `${i * 80}ms` }}
+              >
                 <span className="material-symbols-outlined home-area-card__icon">{area.icon}</span>
                 <h3 className="home-area-card__title">{area.title}</h3>
                 <p className="home-area-card__body">{area.description}</p>
@@ -78,9 +101,9 @@ export default function Home() {
       </section>
 
       {/* ── About ── */}
-      <section className="home-about section-pad">
+      <section className="home-about section-pad" ref={aboutRef}>
         <div className="container home-about__inner">
-          <div className="home-about__text">
+          <div className={`home-about__text anim anim--left ${aboutVisible ? 'is-visible' : ''}`}>
             <h2 className="home-about__title">Uncompromising Standard of Excellence</h2>
             <p className="home-about__body">
               Founded on the principles of integrity and intellectual rigor, LexAuthority has spent
@@ -96,7 +119,10 @@ export default function Home() {
               Learn More About Our History
             </Link>
           </div>
-          <div className="home-about__image">
+          <div
+            className={`home-about__image anim anim--right ${aboutVisible ? 'is-visible' : ''}`}
+            style={{ '--anim-delay': '120ms' }}
+          >
             <img src={ABOUT_IMG} alt="Professional law team meeting" />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useInView } from '../hooks/useInView';
 import './Contact.css';
 
 const MAP_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuByeX5j60qvBM5hINbNyqNVRDMlUxVxio-vsY45PWi_Hvm9PDh2hCa77qZffkD44fFtmoBcDpOw-jVjHjprC8jRYZsE2ZxPFkac8f8tMqRQTzE86sBTFLLsiZXv9KwUk2E2lwMt7q2dQIFsSWpYAmEWKnXKtOuXlmtY-aQ26Xnh6eZPlGtYscnsnjDHUiBkbNXk4Bvklmx1rcb0GkPV6bZlVlLohqftoJ1nw11xvLaRy7q9UZjB4slaXf0T2_G6rJTvTr9_natnxw';
@@ -7,8 +8,11 @@ const INITIAL = { name: '', email: '', practiceArea: '', message: '' };
 
 export default function Contact() {
   const [form, setForm] = useState(INITIAL);
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const [infoRef, infoVisible] = useInView();
+  const [formRef, formVisible] = useInView();
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,7 +42,10 @@ export default function Contact() {
     <main className="contact-page container">
       <div className="contact-grid">
         {/* Left — Firm info */}
-        <section className="contact-info">
+        <section
+          ref={infoRef}
+          className={`contact-info anim anim--left ${infoVisible ? 'is-visible' : ''}`}
+        >
           <div className="contact-info__intro">
             <h1 className="contact-info__title">
               Connect with our<br />legal counsel.
@@ -57,7 +64,6 @@ export default function Contact() {
                 London, UK EC4A 1BL
               </p>
             </div>
-
             <div className="contact-info__row">
               <div className="contact-info__block">
                 <h3 className="contact-info__label">Inquiries</h3>
@@ -78,7 +84,11 @@ export default function Contact() {
         </section>
 
         {/* Right — Form */}
-        <section className="contact-form-wrap">
+        <section
+          ref={formRef}
+          className={`contact-form-wrap anim anim--right ${formVisible ? 'is-visible' : ''}`}
+          style={{ '--anim-delay': '120ms' }}
+        >
           <div className="contact-form-box">
             <h2 className="contact-form__title">Submit an Inquiry</h2>
 
@@ -93,27 +103,19 @@ export default function Contact() {
                   <div className="contact-form__field">
                     <label htmlFor="name" className="contact-form__label">Full Name</label>
                     <input
-                      id="name"
-                      name="name"
-                      type="text"
+                      id="name" name="name" type="text"
                       className="contact-form__input"
                       placeholder="Johnathan Doe"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
+                      value={form.name} onChange={handleChange} required
                     />
                   </div>
                   <div className="contact-form__field">
                     <label htmlFor="email" className="contact-form__label">Email Address</label>
                     <input
-                      id="email"
-                      name="email"
-                      type="email"
+                      id="email" name="email" type="email"
                       className="contact-form__input"
                       placeholder="j.doe@enterprise.com"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
+                      value={form.email} onChange={handleChange} required
                     />
                   </div>
                 </div>
@@ -121,12 +123,9 @@ export default function Contact() {
                 <div className="contact-form__field">
                   <label htmlFor="practiceArea" className="contact-form__label">Practice Area</label>
                   <select
-                    id="practiceArea"
-                    name="practiceArea"
+                    id="practiceArea" name="practiceArea"
                     className="contact-form__input contact-form__select"
-                    value={form.practiceArea}
-                    onChange={handleChange}
-                    required
+                    value={form.practiceArea} onChange={handleChange} required
                   >
                     <option value="" disabled>Select an area of interest</option>
                     <option value="corporate">Corporate &amp; M&amp;A</option>
@@ -141,14 +140,10 @@ export default function Contact() {
                 <div className="contact-form__field">
                   <label htmlFor="message" className="contact-form__label">Nature of Inquiry</label>
                   <textarea
-                    id="message"
-                    name="message"
+                    id="message" name="message"
                     className="contact-form__input contact-form__textarea"
                     placeholder="Briefly describe your legal requirements..."
-                    rows={4}
-                    value={form.message}
-                    onChange={handleChange}
-                    required
+                    rows={4} value={form.message} onChange={handleChange} required
                   />
                 </div>
 
@@ -166,8 +161,7 @@ export default function Contact() {
 
                 <p className="contact-form__disclaimer">
                   By submitting this form, you acknowledge that our receipt of your message does not
-                  create an attorney-client relationship. Please do not send confidential
-                  information.
+                  create an attorney-client relationship. Please do not send confidential information.
                 </p>
               </form>
             )}

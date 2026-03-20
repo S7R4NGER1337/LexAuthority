@@ -1,3 +1,5 @@
+@import './animations.css';
+
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
   --primary:                   #002444;
