@@ -4,7 +4,7 @@ const Insight = require('./models/Insight');
 const TeamMember = require('./models/TeamMember');
 const PracticeArea = require('./models/PracticeArea');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/lexauthority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lexauthority';
 
 const practiceAreas = [
   { title: 'Corporate & M&A', description: 'Advising on complex domestic and cross-border transactions, private equity, and corporate governance for multinational enterprises.', icon: 'business_center', order: 1, slug: 'corporate-ma' },
@@ -36,7 +36,7 @@ const insights = [
 ];
 
 async function seed() {
-  await mongoose.connect(MONGO_URI);
+  await mongoose.connect(MONGODB_URI);
   console.log('Connected to MongoDB');
 
   await PracticeArea.deleteMany({});
