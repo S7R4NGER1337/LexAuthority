@@ -12,4 +12,15 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:slug', async (req, res) => {
+  try {
+    const area = await PracticeArea.findOne({ slug: req.params.slug });
+    if (!area) return res.status(404).json({ message: 'Not found.' });
+    res.json(area);
+  } catch (err) {
+    console.error('Practice area fetch error:', err);
+    res.status(500).json({ message: 'Failed to fetch practice area.' });
+  }
+});
+
 module.exports = router;

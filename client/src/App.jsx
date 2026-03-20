@@ -4,7 +4,8 @@ import PublicLayout from './components/PublicLayout';
 
 // Public pages
 import Home           from './pages/Home';
-import PracticeAreas  from './pages/PracticeAreas';
+import PracticeAreas       from './pages/PracticeAreas';
+import PracticeAreaDetail  from './pages/PracticeAreaDetail';
 import Team           from './pages/Team';
 import Insights       from './pages/Insights';
 import InsightDetail  from './pages/InsightDetail';
@@ -58,7 +59,8 @@ export default function App() {
         {/* ── Public (with Navbar / Footer) ─────────────────── */}
         <Route element={<PublicLayout />}>
           <Route path="/"                   element={<Home />} />
-          <Route path="/practice-areas"     element={<PracticeAreas />} />
+          <Route path="/practice-areas"          element={<PracticeAreas />} />
+          <Route path="/practice-areas/:slug"   element={<PracticeAreaDetail />} />
           <Route path="/team"               element={<Team />} />
           <Route path="/insights"           element={<Insights />} />
           <Route path="/insights/:slug"     element={<InsightDetail />} />

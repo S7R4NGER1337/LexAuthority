@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
 import { apiFetch } from '../utils/api';
 import './PracticeAreas.css';
@@ -49,10 +49,10 @@ export default function PracticeAreas() {
                 </div>
                 <h3 className="pa-card__title">{area.title}</h3>
                 <p className="pa-card__body">{area.description}</p>
-                <a href="#" className="pa-card__link">
+                <Link to={`/practice-areas/${area.slug}`} className="pa-card__link">
                   Explore practice
                   <span className="material-symbols-outlined pa-card__arrow">arrow_forward</span>
-                </a>
+                </Link>
               </div>
             ))}
           </div>
