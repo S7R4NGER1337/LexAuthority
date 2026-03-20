@@ -1,22 +1,5 @@
-# Source pages (not committed) — only the root-level pages/ folder
+# Source pages (not committed) — root-level only
 /pages/
-
-# Dependencies
-node_modules/
-client/node_modules/
-server/node_modules/
-
-# Environment
-.env
-.env.local
-
-# Build output
-client/dist/
-client/build/
-
-# Logs
-*.log
-npm-debug.log*
 
 # OS
 .DS_Store
