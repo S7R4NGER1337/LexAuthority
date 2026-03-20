@@ -7,7 +7,8 @@ router.get('/', async (req, res) => {
     const areas = await PracticeArea.find().sort({ order: 1 });
     res.json(areas);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Practice areas fetch error:', err);
+    res.status(500).json({ message: 'Failed to fetch practice areas.' });
   }
 });
 

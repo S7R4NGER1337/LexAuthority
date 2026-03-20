@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
+import { apiFetch } from '../utils/api';
 import './Team.css';
 
 export default function Team() {
   const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
   const navigate = useNavigate();
 
   const [gridRef, gridVisible] = useInView({ threshold: 0.05 });
   const [ctaRef, ctaVisible]   = useInView();
 
   useEffect(() => {
-    fetch('/api/team')
-      .then((r) => r.json())
+    apiFetch('/api/team')
       .then(setMembers)
-      .catch(console.error);
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
     <main>
-      {/* Header — above fold, CSS animation */}
       <header className="team-header container">
         <p className="team-header__eyebrow hero-anim hero-anim-1">Integrity &amp; Excellence</p>
         <h1 className="team-header__title hero-anim hero-anim-2">Our Legal Professionals</h1>
@@ -29,28 +31,31 @@ export default function Team() {
         </p>
       </header>
 
-      {/* Grid */}
       <section className="team-grid-section container">
-        <div className="team-grid" ref={gridRef}>
-          {members.map((m, i) => (
-            <article
-              key={m._id}
-              className={`team-card anim ${gridVisible ? 'is-visible' : ''}`}
-              style={{ '--anim-delay': `${i * 70}ms` }}
-            >
-              <div className="team-card__photo">
-                <img src={m.imageUrl} alt={m.imageAlt} />
-              </div>
-              <h3 className="team-card__name">{m.name}</h3>
-              <p className="team-card__title">{m.title}</p>
-              <div className="team-card__rule"></div>
-              <p className="team-card__bio">{m.bio}</p>
-            </article>
-          ))}
-        </div>
+        {loading && <p className="page-loading">Loading…</p>}
+        {error   && <p className="page-error">Unable to load team members. Please try again later.</p>}
+
+        {!loading && !error && (
+          <div className="team-grid" ref={gridRef}>
+            {members.map((m, i) => (
+              <article
+                key={m._id}
+                className={`team-card anim ${gridVisible ? 'is-visible' : ''}`}
+                style={{ '--anim-delay': `${i * 70}ms` }}
+              >
+                <div className="team-card__photo">
+                  <img src={m.imageUrl} alt={m.imageAlt} />
+                </div>
+                <h3 className="team-card__name">{m.name}</h3>
+                <p className="team-card__title">{m.title}</p>
+                <div className="team-card__rule"></div>
+                <p className="team-card__bio">{m.bio}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* CTA */}
       <section className="team-cta">
         <div
           ref={ctaRef}
@@ -64,9 +69,7 @@ export default function Team() {
             </p>
           </div>
           <div className="team-cta__actions">
-            <button className="btn-primary" onClick={() => navigate('/contact')}>
-              Contact the Firm
-            </button>
+            <button className="btn-primary" onClick={() => navigate('/contact')}>Contact the Firm</button>
             <button className="btn-ghost">View Offices</button>
           </div>
         </div>

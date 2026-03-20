@@ -125,3 +125,19 @@ img {
 .section-pad-lg {
   padding-block: 8rem;
 }
+
+/* ─── Page-level loading / error feedback ────────────────────── */
+.page-loading,
+.page-error {
+  padding: 4rem 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.page-loading {
+  color: var(--outline);
+}
+
+.page-error {
+  color: var(--error);
+}

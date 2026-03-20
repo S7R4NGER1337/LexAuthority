@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
 import { useCountUp } from '../hooks/useCountUp';
+import { apiFetch } from '../utils/api';
 import './Home.css';
 
 const HERO_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGaRu6n1Ej07sgPAPad6_DnwyRCvHX81wX2gwYUT0FxaQ4VimpuHxMUusgotcL9xLQoEYO_XgQeTtG6LxaxTE1z3_Evlt3HJnnWw1hwxtyG6iEst1tXu1CrmRhyggM6RyEFxpHpNzY9a-QNlRlJ6GO_JQvwi5tsr21Bd2cF8PGF9gUDO266IXQ-oYVYlEhxrGkf4WTOUZKVTXeaPmgFxom4derOhWL2z6lnEn5zoTEufFvpXcctjB3h3f7msegonH2EhT7z2K0Dg';
 const ABOUT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBpUfDQTqdrrHqNpttzmiF4Qw9V_orfJIqv_4wnJmoIqe4LhonUWU2l6RY2Rna0GOnZoBEfVfem7DiQAx7ECqt7zHwuYIUgEFC5krowYC5S9qaXtnzcMWXjrUj4ZhsboXR-BwjvbWOlGwlgWfw0ZfR62mQAY821xWv6YaDcw223DV0TwpzdXrpjNzKi3Ne4ahV4FhlVyW0ejFk70h5ik_Nt-sjS6BDtX8q9QOs6D-u0abiUZmbkVTeQ5VUqAEB8rBnX832K3LxXiA';
 
-// target: numeric value to count to | suffix: the text appended after
 const STATS = [
   { target: 25,  suffix: '+',  label: 'Years of Excellence' },
   { target: 400, suffix: '+',  label: 'Partners Globally' },
@@ -16,7 +16,7 @@ const STATS = [
 ];
 
 function StatItem({ stat, isVisible, delay }) {
-  const value = useCountUp(stat.target, { active: isVisible, duration: 1400 });
+  const value = useCountUp(stat.target, { active: isVisible, duration: 1800 });
   return (
     <div
       className={`home-stats__item anim ${isVisible ? 'is-visible' : ''}`}
@@ -32,28 +32,22 @@ export default function Home() {
   const [areas, setAreas] = useState([]);
   const navigate = useNavigate();
 
-  // Scroll observers
-  const [statsRef, statsVisible]   = useInView();
-  const [areasRef, areasVisible]   = useInView();
-  const [aboutRef, aboutVisible]   = useInView();
+  const [statsRef, statsVisible]     = useInView();
+  const [areasRef, areasVisible]     = useInView();
+  const [aboutRef, aboutVisible]     = useInView();
   const [sectionRef, sectionVisible] = useInView();
 
   useEffect(() => {
-    fetch('/api/practice-areas')
-      .then((r) => r.json())
-      .then(setAreas)
-      .catch(console.error);
+    apiFetch('/api/practice-areas').then(setAreas).catch(console.error);
   }, []);
 
   return (
     <main>
-      {/* ── Hero (above fold — CSS animation) ── */}
+      {/* ── Hero ── */}
       <section className="home-hero section-pad-lg">
         <div className="container home-hero__inner">
           <div className="home-hero__text">
-            <h1 className="home-hero__title hero-anim hero-anim-1">
-              Your Trusted Legal Partner
-            </h1>
+            <h1 className="home-hero__title hero-anim hero-anim-1">Your Trusted Legal Partner</h1>
             <p className="home-hero__body hero-anim hero-anim-2">
               Providing sophisticated legal solutions for complex challenges. Our heritage of
               excellence ensures your interests are protected with precision and integrity.
@@ -123,9 +117,7 @@ export default function Home() {
               the broader business objective, ensuring our clients remain ahead in an ever-evolving
               world.
             </p>
-            <Link to="/team" className="home-about__link">
-              Learn More About Our History
-            </Link>
+            <Link to="/team" className="home-about__link">Learn More About Our History</Link>
           </div>
           <div
             className={`home-about__image anim anim--right ${aboutVisible ? 'is-visible' : ''}`}

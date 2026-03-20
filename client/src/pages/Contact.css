@@ -129,11 +129,22 @@
 }
 
 .contact-form__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--outline);
+}
+
+.contact-form__counter {
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--outline-variant);
 }
 
 .contact-form__input {

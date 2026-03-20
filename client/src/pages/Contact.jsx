@@ -1,14 +1,27 @@
 import { useState } from 'react';
 import { useInView } from '../hooks/useInView';
+import { apiFetch } from '../utils/api';
 import './Contact.css';
 
 const MAP_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuByeX5j60qvBM5hINbNyqNVRDMlUxVxio-vsY45PWi_Hvm9PDh2hCa77qZffkD44fFtmoBcDpOw-jVjHjprC8jRYZsE2ZxPFkac8f8tMqRQTzE86sBTFLLsiZXv9KwUk2E2lwMt7q2dQIFsSWpYAmEWKnXKtOuXlmtY-aQ26Xnh6eZPlGtYscnsnjDHUiBkbNXk4Bvklmx1rcb0GkPV6bZlVlLohqftoJ1nw11xvLaRy7q9UZjB4slaXf0T2_G6rJTvTr9_natnxw';
 
 const INITIAL = { name: '', email: '', practiceArea: '', message: '' };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validate(form) {
+  if (!form.name.trim())        return 'Full name is required.';
+  if (form.name.trim().length > 120) return 'Name must be 120 characters or fewer.';
+  if (!form.email.trim())       return 'Email address is required.';
+  if (!EMAIL_RE.test(form.email)) return 'Please enter a valid email address.';
+  if (!form.practiceArea)       return 'Please select a practice area.';
+  if (!form.message.trim())     return 'Please describe your inquiry.';
+  if (form.message.trim().length > 4000) return 'Message must be 4000 characters or fewer.';
+  return null;
+}
 
 export default function Contact() {
-  const [form, setForm] = useState(INITIAL);
-  const [status, setStatus] = useState('idle');
+  const [form, setForm]     = useState(INITIAL);
+  const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState('');
 
   const [infoRef, infoVisible] = useInView();
@@ -20,21 +33,28 @@ export default function Contact() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    const validationError = validate(form);
+    if (validationError) {
+      setStatus('error');
+      setErrorMsg(validationError);
+      return;
+    }
+
     setStatus('loading');
     setErrorMsg('');
     try {
-      const res = await fetch('/api/inquiries', {
+      await apiFetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Submission failed.');
       setStatus('success');
       setForm(INITIAL);
     } catch (err) {
       setStatus('error');
-      setErrorMsg(err.message);
+      // Show only safe server messages; apiFetch already sanitises status codes
+      setErrorMsg(err.message || 'Submission failed. Please try again.');
     }
   }
 
@@ -60,8 +80,7 @@ export default function Contact() {
             <div className="contact-info__block">
               <h3 className="contact-info__label">Primary Office</h3>
               <p className="contact-info__value">
-                One Chancery Plaza, Suite 400<br />
-                London, UK EC4A 1BL
+                One Chancery Plaza, Suite 400<br />London, UK EC4A 1BL
               </p>
             </div>
             <div className="contact-info__row">
@@ -106,7 +125,8 @@ export default function Contact() {
                       id="name" name="name" type="text"
                       className="contact-form__input"
                       placeholder="Johnathan Doe"
-                      value={form.name} onChange={handleChange} required
+                      value={form.name} onChange={handleChange}
+                      maxLength={120}
                     />
                   </div>
                   <div className="contact-form__field">
@@ -115,7 +135,7 @@ export default function Contact() {
                       id="email" name="email" type="email"
                       className="contact-form__input"
                       placeholder="j.doe@enterprise.com"
-                      value={form.email} onChange={handleChange} required
+                      value={form.email} onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -125,7 +145,7 @@ export default function Contact() {
                   <select
                     id="practiceArea" name="practiceArea"
                     className="contact-form__input contact-form__select"
-                    value={form.practiceArea} onChange={handleChange} required
+                    value={form.practiceArea} onChange={handleChange}
                   >
                     <option value="" disabled>Select an area of interest</option>
                     <option value="corporate">Corporate &amp; M&amp;A</option>
@@ -138,17 +158,24 @@ export default function Contact() {
                 </div>
 
                 <div className="contact-form__field">
-                  <label htmlFor="message" className="contact-form__label">Nature of Inquiry</label>
+                  <label htmlFor="message" className="contact-form__label">
+                    Nature of Inquiry
+                    <span className="contact-form__counter">
+                      {form.message.length}/4000
+                    </span>
+                  </label>
                   <textarea
                     id="message" name="message"
                     className="contact-form__input contact-form__textarea"
-                    placeholder="Briefly describe your legal requirements..."
-                    rows={4} value={form.message} onChange={handleChange} required
+                    placeholder="Briefly describe your legal requirements…"
+                    rows={4}
+                    value={form.message} onChange={handleChange}
+                    maxLength={4000}
                   />
                 </div>
 
                 {status === 'error' && (
-                  <p className="contact-form__error">{errorMsg}</p>
+                  <p className="contact-form__error" role="alert">{errorMsg}</p>
                 )}
 
                 <button

@@ -7,7 +7,8 @@ router.get('/', async (req, res) => {
     const members = await TeamMember.find().sort({ order: 1 });
     res.json(members);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Team fetch error:', err);
+    res.status(500).json({ message: 'Failed to fetch team members.' });
   }
 });
 
