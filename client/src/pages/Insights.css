@@ -76,6 +76,9 @@
 /* ── Card ────────────────────────────────────────────────────── */
 .insight-card {
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 .insight-card__image {

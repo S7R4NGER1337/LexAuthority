@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import PracticeAreas from './pages/PracticeAreas';
 import Team from './pages/Team';
 import Insights from './pages/Insights';
+import InsightDetail from './pages/InsightDetail';
 import Contact from './pages/Contact';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/practice-areas" element={<PracticeAreas />} />
         <Route path="/team" element={<Team />} />
         <Route path="/insights" element={<Insights />} />
+        <Route path="/insights/:slug" element={<InsightDetail />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
       <Footer />

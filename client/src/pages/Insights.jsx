@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
 import { apiFetch } from '../utils/api';
 import './Insights.css';
@@ -62,8 +63,9 @@ export default function Insights() {
       {!loading && !error && (
         <section className="insights-grid" ref={gridRef}>
           {insights.map((item, i) => (
-            <article
+            <Link
               key={item._id}
+              to={`/insights/${item.slug}`}
               className={`insight-card anim ${gridVisible ? 'is-visible' : ''}`}
               style={{ '--anim-delay': `${i * 80}ms` }}
             >
@@ -79,7 +81,7 @@ export default function Insights() {
                   <span className="material-symbols-outlined insight-card__arrow">arrow_forward</span>
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </section>
       )}
