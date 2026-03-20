@@ -1,17 +1,32 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
+import { useCountUp } from '../hooks/useCountUp';
 import './Home.css';
 
 const HERO_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGaRu6n1Ej07sgPAPad6_DnwyRCvHX81wX2gwYUT0FxaQ4VimpuHxMUusgotcL9xLQoEYO_XgQeTtG6LxaxTE1z3_Evlt3HJnnWw1hwxtyG6iEst1tXu1CrmRhyggM6RyEFxpHpNzY9a-QNlRlJ6GO_JQvwi5tsr21Bd2cF8PGF9gUDO266IXQ-oYVYlEhxrGkf4WTOUZKVTXeaPmgFxom4derOhWL2z6lnEn5zoTEufFvpXcctjB3h3f7msegonH2EhT7z2K0Dg';
 const ABOUT_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBpUfDQTqdrrHqNpttzmiF4Qw9V_orfJIqv_4wnJmoIqe4LhonUWU2l6RY2Rna0GOnZoBEfVfem7DiQAx7ECqt7zHwuYIUgEFC5krowYC5S9qaXtnzcMWXjrUj4ZhsboXR-BwjvbWOlGwlgWfw0ZfR62mQAY821xWv6YaDcw223DV0TwpzdXrpjNzKi3Ne4ahV4FhlVyW0ejFk70h5ik_Nt-sjS6BDtX8q9QOs6D-u0abiUZmbkVTeQ5VUqAEB8rBnX832K3LxXiA';
 
+// target: numeric value to count to | suffix: the text appended after
 const STATS = [
-  { value: '25+', label: 'Years of Excellence' },
-  { value: '400+', label: 'Partners Globally' },
-  { value: '12k+', label: 'Cases Resolved' },
-  { value: '98%', label: 'Client Satisfaction' },
+  { target: 25,  suffix: '+',  label: 'Years of Excellence' },
+  { target: 400, suffix: '+',  label: 'Partners Globally' },
+  { target: 12,  suffix: 'k+', label: 'Cases Resolved' },
+  { target: 98,  suffix: '%',  label: 'Client Satisfaction' },
 ];
+
+function StatItem({ stat, isVisible, delay }) {
+  const value = useCountUp(stat.target, { active: isVisible, duration: 1400 });
+  return (
+    <div
+      className={`home-stats__item anim ${isVisible ? 'is-visible' : ''}`}
+      style={{ '--anim-delay': `${delay}ms` }}
+    >
+      <span className="home-stats__value">{value}{stat.suffix}</span>
+      <span className="home-stats__label">{stat.label}</span>
+    </div>
+  );
+}
 
 export default function Home() {
   const [areas, setAreas] = useState([]);
@@ -61,14 +76,7 @@ export default function Home() {
         <div className="container">
           <div className="home-stats__grid" ref={statsRef}>
             {STATS.map((s, i) => (
-              <div
-                key={s.label}
-                className={`home-stats__item anim ${statsVisible ? 'is-visible' : ''}`}
-                style={{ '--anim-delay': `${i * 100}ms` }}
-              >
-                <span className="home-stats__value">{s.value}</span>
-                <span className="home-stats__label">{s.label}</span>
-              </div>
+              <StatItem key={s.label} stat={s} isVisible={statsVisible} delay={i * 100} />
             ))}
           </div>
         </div>
