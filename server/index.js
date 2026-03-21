@@ -23,7 +23,9 @@ if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
   process.exit(1);
 }
 const PORT = process.env.PORT || 5000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim());
 
 // ── Database connection (cached for serverless) ───────────────
 let dbReady = false;
@@ -45,13 +47,21 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ── Security headers ─────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // ── Compression ───────────────────────────────────────────────
 app.use(compression());
 
 // ── CORS — only allow our frontend origin ────────────────────
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true, optionsSuccessStatus: 200, maxAge: 86400 }));
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+  maxAge: 86400,
+}));
 
 // ── Cookie parsing ───────────────────────────────────────────
 app.use(cookieParser());
