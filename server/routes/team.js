@@ -5,6 +5,7 @@ const TeamMember = require('../models/TeamMember');
 router.get('/', async (req, res) => {
   try {
     const members = await TeamMember.find().sort({ order: 1 });
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     res.json(members);
   } catch (err) {
     console.error('Team fetch error:', err);

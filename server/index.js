@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const mongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
@@ -27,6 +28,9 @@ const app = express();
 
 // ── Security headers ─────────────────────────────────────────
 app.use(helmet());
+
+// ── Compression ───────────────────────────────────────────────
+app.use(compression());
 
 // ── CORS — only allow our frontend origin ────────────────────
 app.use(cors({ origin: CLIENT_ORIGIN, optionsSuccessStatus: 200, maxAge: 86400 }));

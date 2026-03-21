@@ -14,7 +14,7 @@ const practiceAreas = [
     icon: 'business_center',
     order: 1,
     slug: 'corporate-ma',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDJj3VewfuoR_FhEy2_cQOS4gWQED-mXKd9up6VuvfLnyKQ7y_-WeT3fXdGQrAiBMmngNMSrDqaaqO1Fqc8JnvsVM5ocj2lhrUEp--5Sc5kqk35KiB59Qrf-abXjjTwZ5tUyCGaLLXnK4p07TXDOjozajCrqeztqvDX1Zxh4Foa8vG4Jhto5Ps-vq2WF_eCIPYp8xFD-1275PuQOYYSTilskp5F_yD8AOQ4KvL83Myl1CWBB_Lcc6BORsCqR_Sno_rowflbnhGjnBw',
+    imageUrl: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&q=80',
     services: [
       { icon: 'handshake',      title: 'Mergers & Acquisitions',  description: 'Strategic counsel for buy-side and sell-side mandates. We manage the full lifecycle of the transaction from initial due diligence to final closing integration.' },
       { icon: 'account_balance', title: 'Private Equity',          description: 'Dedicated advisory for funds and institutional investors. Structuring complex leveraged buyouts, growth capital investments, and exit strategies across jurisdictions.' },
@@ -334,8 +334,8 @@ const insights = [
 <h2>Regulatory Horizon</h2>
 <p>European regulators are increasingly focused on the systemic risk implications of private credit growth. ESMA and national competent authorities are developing enhanced reporting frameworks for credit funds. Borrowers should expect lenders to pass compliance costs through documentation, and counsel advising on new facilities should build regulatory change provisions into long-term credit agreements.</p>
     `.trim(),
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBSTZWpOnlpeFs3R2V7Cl1KtJeaF0Rdmm6K9yyKKVV3gQ7jkogwx7EkID51ae4zLrTvoMh4F3GE34IASwNsVvtwwroVg_4DAOsMksSGVOQB7QeAQPceMeLBWe8lSE1JQP3ZyWmh_ipzRdjKCHltvA5uOVI10JlhECfekJb3FeqQi8jPdYBAJtAm8xgB1PbiL5GUb7pj5wFgeH4du8BrA7oLvUCrNZS5f3OZgetDgwqjs8620GsNnjEyI8d22DxscQw2GqpLbRLOcg',
-    imageAlt: 'Close-up of law books in a formal library setting',
+    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80',
+    imageAlt: 'Business professional reviewing financial documents at a desk',
     publishedAt: new Date('2024-03-10'),
     slug: 'private-credit-legal-frameworks',
   },
@@ -362,8 +362,8 @@ const insights = [
 <h2>Strategic Implications for Non-Gatekeeper Firms</h2>
 <p>The DMA's impact extends beyond designated gatekeepers. Businesses that operate within gatekeeper ecosystems — as app developers, advertisers, or marketplace sellers — gain new rights to challenge unfair platform practices and access data previously withheld. Legal teams should assess which DMA obligations their platform partners are now subject to and how to leverage these rights in commercial negotiations.</p>
     `.trim(),
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA05ngTaZX4EpN3cN_SweJ0M3QqCSb6dmGQPBV7MVNZaS5JmV6XS2JbG6-zojA52Ene-y-TTuejfqkfZLGUosyib_eXSw5AFf7gK_FvgheIGi_hZLvjrb6N81NcNnSiIojjHtUarTT1GwllyWOpq5Xrczxl-015wpbBmdHfncl5dBfmK-Jh-FbMCk1UB5W9kJ5hrc5sO8EzEAJQkqHGZGRCON_I8otzEe7YfpECXsLan-INsCtACC9QwRHyFgaKdcEueOswZgeX-Q',
-    imageAlt: 'Stately stone columns of a financial institution',
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
+    imageAlt: 'Laptop displaying digital platform interface with data analytics',
     publishedAt: new Date('2024-03-05'),
     slug: 'digital-markets-act-platform-liability',
   },

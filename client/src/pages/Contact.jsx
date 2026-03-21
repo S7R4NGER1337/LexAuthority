@@ -78,15 +78,21 @@ export default function Contact() {
 
           <div className="contact-info__details">
             <div className="contact-info__block">
-              <h3 className="contact-info__label">Primary Office</h3>
+              <h3 className="contact-info__label">London — Primary Office</h3>
               <p className="contact-info__value">
                 One Chancery Plaza, Suite 400<br />London, UK EC4A 1BL
+              </p>
+            </div>
+            <div className="contact-info__block">
+              <h3 className="contact-info__label">New York Office</h3>
+              <p className="contact-info__value">
+                340 Madison Avenue, 18th Floor<br />New York, NY 10173, USA
               </p>
             </div>
             <div className="contact-info__row">
               <div className="contact-info__block">
                 <h3 className="contact-info__label">Inquiries</h3>
-                <p className="contact-info__value">+44 (0) 20 7946 0123</p>
+                <p className="contact-info__value">+44 (0) 20 7946 0358</p>
                 <p className="contact-info__value">contact@lexauthority.law</p>
               </div>
               <div className="contact-info__block">

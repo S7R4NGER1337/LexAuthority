@@ -60,7 +60,7 @@ router.post('/login', loginLimiter, (req, res) => {
   ) {
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
-  const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
+  const token = jwt.sign({ username: process.env.ADMIN_USERNAME, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
   res.json({ token });
 });
 
@@ -88,7 +88,7 @@ router.post('/insights', async (req, res) => {
     res.status(201).json(doc);
   } catch (err) {
     console.error('POST /admin/insights:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid insight data.' });
   }
 });
 
@@ -104,7 +104,7 @@ router.put('/insights/:id', async (req, res) => {
     res.json(doc);
   } catch (err) {
     console.error('PUT /admin/insights/:id:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid insight data.' });
   }
 });
 
@@ -130,24 +130,44 @@ router.get('/team', async (req, res) => {
 });
 
 router.post('/team', async (req, res) => {
+  const { name, title, bio, imageUrl, imageAlt, order } = req.body;
+  if (!name || typeof name !== 'string' || name.trim().length > 120) {
+    return res.status(400).json({ message: 'Name is required (max 120 chars).' });
+  }
+  if (!title || typeof title !== 'string' || title.trim().length > 120) {
+    return res.status(400).json({ message: 'Title is required (max 120 chars).' });
+  }
+  if (bio && (typeof bio !== 'string' || bio.trim().length > 1000)) {
+    return res.status(400).json({ message: 'Bio must be 1000 characters or fewer.' });
+  }
   try {
-    const doc = await TeamMember.create(req.body);
+    const doc = await TeamMember.create({ name: name.trim(), title: title.trim(), bio: bio?.trim(), imageUrl, imageAlt, order });
     res.status(201).json(doc);
   } catch (err) {
     console.error('POST /admin/team:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid team member data.' });
   }
 });
 
 router.put('/team/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
+  const { name, title, bio } = req.body;
+  if (name !== undefined && (typeof name !== 'string' || name.trim().length > 120)) {
+    return res.status(400).json({ message: 'Name must be 120 characters or fewer.' });
+  }
+  if (title !== undefined && (typeof title !== 'string' || title.trim().length > 120)) {
+    return res.status(400).json({ message: 'Title must be 120 characters or fewer.' });
+  }
+  if (bio !== undefined && (typeof bio !== 'string' || bio.trim().length > 1000)) {
+    return res.status(400).json({ message: 'Bio must be 1000 characters or fewer.' });
+  }
   try {
     const doc = await TeamMember.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
   } catch (err) {
     console.error('PUT /admin/team/:id:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid team member data.' });
   }
 });
 
@@ -173,24 +193,38 @@ router.get('/practice-areas', async (req, res) => {
 });
 
 router.post('/practice-areas', async (req, res) => {
+  const { title, description } = req.body;
+  if (!title || typeof title !== 'string' || title.trim().length > 120) {
+    return res.status(400).json({ message: 'Title is required (max 120 chars).' });
+  }
+  if (!description || typeof description !== 'string' || description.trim().length > 500) {
+    return res.status(400).json({ message: 'Description is required (max 500 chars).' });
+  }
   try {
     const doc = await PracticeArea.create(req.body);
     res.status(201).json(doc);
   } catch (err) {
     console.error('POST /admin/practice-areas:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid practice area data.' });
   }
 });
 
 router.put('/practice-areas/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
+  const { title, description } = req.body;
+  if (title !== undefined && (typeof title !== 'string' || title.trim().length > 120)) {
+    return res.status(400).json({ message: 'Title must be 120 characters or fewer.' });
+  }
+  if (description !== undefined && (typeof description !== 'string' || description.trim().length > 500)) {
+    return res.status(400).json({ message: 'Description must be 500 characters or fewer.' });
+  }
   try {
     const doc = await PracticeArea.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
   } catch (err) {
     console.error('PUT /admin/practice-areas/:id:', err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid practice area data.' });
   }
 });
 
@@ -222,7 +256,7 @@ router.patch('/inquiries/:id/status', async (req, res) => {
     return res.status(400).json({ message: 'Invalid status.' });
   }
   try {
-    const doc = await Inquiry.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const doc = await Inquiry.findByIdAndUpdate(req.params.id, { status }, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
   } catch (err) {

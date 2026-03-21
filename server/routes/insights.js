@@ -27,10 +27,11 @@ router.get('/', async (req, res) => {
     const skip  = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      Insight.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+      Insight.find(filter).select('-body').sort({ publishedAt: -1 }).skip(skip).limit(limit),
       Insight.countDocuments(filter),
     ]);
 
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     res.json({ data, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     console.error('Insights fetch error:', err);
@@ -43,6 +44,7 @@ router.get('/:slug', async (req, res) => {
   try {
     const insight = await Insight.findOne({ slug: req.params.slug });
     if (!insight) return res.status(404).json({ message: 'Not found.' });
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     res.json(insight);
   } catch (err) {
     console.error('Insight fetch error:', err);

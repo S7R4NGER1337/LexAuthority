@@ -23,6 +23,16 @@ export default function Footer() {
         </div>
 
         <div className="footer__col">
+          <h4 className="footer__heading">Contact</h4>
+          <ul className="footer__list">
+            <li>One Chancery Plaza, Suite 400</li>
+            <li>London, UK EC4A 1BL</li>
+            <li><a href="mailto:contact@lexauthority.law">contact@lexauthority.law</a></li>
+            <li>+44 (0) 20 7946 0358</li>
+          </ul>
+        </div>
+
+        <div className="footer__col">
           <h4 className="footer__heading">Governance</h4>
           <ul className="footer__list">
             <li><a href="#">Legal Notice</a></li>

@@ -56,7 +56,7 @@
   padding: 3rem;
   border-right: 1px solid rgba(195, 198, 207, 0.4);
   border-bottom: 1px solid rgba(195, 198, 207, 0.4);
-  transition: background-color 0.2s;
+  transition: background-color 0.25s;
   display: flex;
   flex-direction: column;
 }
@@ -99,13 +99,13 @@
   text-decoration: none;
 }
 
-.pa-card:hover .pa-card__link {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .pa-card__arrow {
   font-size: 1rem;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pa-card:hover .pa-card__arrow {
+  transform: translateX(5px);
 }
 
 /* ── CTA ─────────────────────────────────────────────────────── */
