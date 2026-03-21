@@ -35,6 +35,18 @@ function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
+function isValidImageUrl(url) {
+  if (!url) return true;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:';
+  } catch { return false; }
+}
+
+function isValidSlug(slug) {
+  return typeof slug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+}
+
 // ── Rate limits ───────────────────────────────────────────────
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -50,6 +62,8 @@ const writeLimiter = rateLimit({
 });
 
 // ── Auth ──────────────────────────────────────────────────────
+const COOKIE_TTL_MS = 8 * 60 * 60 * 1000; // 8 h
+
 router.post('/login', loginLimiter, (req, res) => {
   const { username, password } = req.body;
   if (
@@ -60,8 +74,27 @@ router.post('/login', loginLimiter, (req, res) => {
   ) {
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
-  const token = jwt.sign({ username: process.env.ADMIN_USERNAME, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
-  res.json({ token });
+  const token = jwt.sign(
+    { username: process.env.ADMIN_USERNAME, role: 'admin' },
+    process.env.JWT_SECRET,
+    { expiresIn: '8h' },
+  );
+  res.cookie('admin_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: COOKIE_TTL_MS,
+  });
+  res.json({ expiresAt: Date.now() + COOKIE_TTL_MS });
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  res.json({ message: 'Logged out.' });
 });
 
 // All routes below require a valid token
@@ -79,12 +112,18 @@ router.get('/insights', async (req, res) => {
 });
 
 router.post('/insights', async (req, res) => {
-  if (req.body.category && !ALLOWED_CATEGORIES.includes(req.body.category)) {
+  const { title, excerpt, body, author, authorTitle, category, slug, tags, imageUrl, imageAlt, readTime, publishedAt } = req.body;
+  if (category && !ALLOWED_CATEGORIES.includes(category)) {
     return res.status(400).json({ message: 'Invalid category.' });
   }
+  if (slug && !isValidSlug(slug)) {
+    return res.status(400).json({ message: 'Slug must be lowercase alphanumeric with hyphens.' });
+  }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
-    const payload = { ...req.body, body: sanitizeBody(req.body.body) };
-    const doc = await Insight.create(payload);
+    const doc = await Insight.create({ title, excerpt, body: sanitizeBody(body), author, authorTitle, category, slug, tags, imageUrl, imageAlt, readTime, publishedAt });
     res.status(201).json(doc);
   } catch (err) {
     console.error('POST /admin/insights:', err);
@@ -94,11 +133,20 @@ router.post('/insights', async (req, res) => {
 
 router.put('/insights/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
-  if (req.body.category && !ALLOWED_CATEGORIES.includes(req.body.category)) {
+  const { title, excerpt, body, author, authorTitle, category, slug, tags, imageUrl, imageAlt, readTime, publishedAt } = req.body;
+  if (category && !ALLOWED_CATEGORIES.includes(category)) {
     return res.status(400).json({ message: 'Invalid category.' });
   }
+  if (slug && !isValidSlug(slug)) {
+    return res.status(400).json({ message: 'Slug must be lowercase alphanumeric with hyphens.' });
+  }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
-    const payload = { ...req.body, body: sanitizeBody(req.body.body) };
+    const payload = { title, excerpt, body: sanitizeBody(body), author, authorTitle, category, slug, tags, imageUrl, imageAlt, readTime, publishedAt };
+    // strip undefined so partial updates don't clear existing fields
+    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
     const doc = await Insight.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
@@ -140,6 +188,9 @@ router.post('/team', async (req, res) => {
   if (bio && (typeof bio !== 'string' || bio.trim().length > 1000)) {
     return res.status(400).json({ message: 'Bio must be 1000 characters or fewer.' });
   }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
     const doc = await TeamMember.create({ name: name.trim(), title: title.trim(), bio: bio?.trim(), imageUrl, imageAlt, order });
     res.status(201).json(doc);
@@ -151,7 +202,7 @@ router.post('/team', async (req, res) => {
 
 router.put('/team/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
-  const { name, title, bio } = req.body;
+  const { name, title, bio, imageUrl, imageAlt, order } = req.body;
   if (name !== undefined && (typeof name !== 'string' || name.trim().length > 120)) {
     return res.status(400).json({ message: 'Name must be 120 characters or fewer.' });
   }
@@ -161,8 +212,16 @@ router.put('/team/:id', async (req, res) => {
   if (bio !== undefined && (typeof bio !== 'string' || bio.trim().length > 1000)) {
     return res.status(400).json({ message: 'Bio must be 1000 characters or fewer.' });
   }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
-    const doc = await TeamMember.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const update = { name, title, bio, imageUrl, imageAlt, order };
+    Object.keys(update).forEach(k => update[k] === undefined && delete update[k]);
+    if (update.name)  update.name  = update.name.trim();
+    if (update.title) update.title = update.title.trim();
+    if (update.bio)   update.bio   = update.bio.trim();
+    const doc = await TeamMember.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
   } catch (err) {
@@ -193,15 +252,18 @@ router.get('/practice-areas', async (req, res) => {
 });
 
 router.post('/practice-areas', async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, fullDescription, icon, imageUrl, order, slug, services, sectors } = req.body;
   if (!title || typeof title !== 'string' || title.trim().length > 120) {
     return res.status(400).json({ message: 'Title is required (max 120 chars).' });
   }
   if (!description || typeof description !== 'string' || description.trim().length > 500) {
     return res.status(400).json({ message: 'Description is required (max 500 chars).' });
   }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
-    const doc = await PracticeArea.create(req.body);
+    const doc = await PracticeArea.create({ title: title.trim(), description: description.trim(), fullDescription, icon, imageUrl, order, slug, services, sectors });
     res.status(201).json(doc);
   } catch (err) {
     console.error('POST /admin/practice-areas:', err);
@@ -211,15 +273,22 @@ router.post('/practice-areas', async (req, res) => {
 
 router.put('/practice-areas/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(400).json({ message: 'Invalid ID.' });
-  const { title, description } = req.body;
+  const { title, description, fullDescription, icon, imageUrl, order, slug, services, sectors } = req.body;
   if (title !== undefined && (typeof title !== 'string' || title.trim().length > 120)) {
     return res.status(400).json({ message: 'Title must be 120 characters or fewer.' });
   }
   if (description !== undefined && (typeof description !== 'string' || description.trim().length > 500)) {
     return res.status(400).json({ message: 'Description must be 500 characters or fewer.' });
   }
+  if (!isValidImageUrl(imageUrl)) {
+    return res.status(400).json({ message: 'imageUrl must be a valid http/https URL.' });
+  }
   try {
-    const doc = await PracticeArea.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const update = { title, description, fullDescription, icon, imageUrl, order, slug, services, sectors };
+    Object.keys(update).forEach(k => update[k] === undefined && delete update[k]);
+    if (update.title)       update.title       = update.title.trim();
+    if (update.description) update.description = update.description.trim();
+    const doc = await PracticeArea.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
     if (!doc) return res.status(404).json({ message: 'Not found.' });
     res.json(doc);
   } catch (err) {

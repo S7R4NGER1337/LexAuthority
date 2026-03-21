@@ -1,22 +1,21 @@
 const TIMEOUT_MS = 8000;
 
-function getToken() {
-  return localStorage.getItem('admin_token');
-}
-
 export async function adminFetch(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   const headers = { 'Content-Type': 'application/json', ...options.headers };
-  const token = getToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   try {
-    const res = await fetch(url, { ...options, headers, signal: controller.signal });
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include',
+      signal: controller.signal,
+    });
 
     if (res.status === 401) {
-      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_exp');
       window.location.href = '/admin/login';
       return;
     }

@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const mongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 
 // ── Validate required env vars before anything else ──────────
@@ -33,7 +34,10 @@ app.use(helmet());
 app.use(compression());
 
 // ── CORS — only allow our frontend origin ────────────────────
-app.use(cors({ origin: CLIENT_ORIGIN, optionsSuccessStatus: 200, maxAge: 86400 }));
+app.use(cors({ origin: CLIENT_ORIGIN, credentials: true, optionsSuccessStatus: 200, maxAge: 86400 }));
+
+// ── Cookie parsing ───────────────────────────────────────────
+app.use(cookieParser());
 
 // ── Body parsing ─────────────────────────────────────────────
 app.use('/api/admin/insights', express.json({ limit: '200kb' })); // insight body is HTML
@@ -60,6 +64,9 @@ const inquiryLimiter = rateLimit({
   max: 10,
   message: { message: 'Too many inquiries submitted. Please try again in an hour.' },
 });
+
+// ── Health check ─────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 // ── Routes ───────────────────────────────────────────────────
 app.use('/api/insights',       require('./routes/insights'));

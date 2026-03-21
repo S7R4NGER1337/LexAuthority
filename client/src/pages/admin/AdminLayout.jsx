@@ -11,8 +11,9 @@ const NAV = [
 export default function AdminLayout() {
   const navigate = useNavigate();
 
-  function handleLogout() {
-    localStorage.removeItem('admin_token');
+  async function handleLogout() {
+    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    localStorage.removeItem('admin_exp');
     navigate('/admin/login');
   }
 

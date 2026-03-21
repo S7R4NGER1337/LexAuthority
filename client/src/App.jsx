@@ -20,14 +20,8 @@ import AdminPracticeAreas from './pages/admin/AdminPracticeAreas';
 import AdminInquiries     from './pages/admin/AdminInquiries';
 
 function isTokenValid() {
-  const token = localStorage.getItem('admin_token');
-  if (!token) return false;
-  try {
-    const { exp } = JSON.parse(atob(token.split('.')[1]));
-    return exp * 1000 > Date.now();
-  } catch {
-    return false;
-  }
+  const exp = localStorage.getItem('admin_exp');
+  return exp && Number(exp) > Date.now();
 }
 
 function RequireAdmin({ children }) {

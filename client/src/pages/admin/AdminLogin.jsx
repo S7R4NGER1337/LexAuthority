@@ -17,11 +17,12 @@ export default function AdminLogin() {
       const res  = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed.');
-      localStorage.setItem('admin_token', data.token);
+      localStorage.setItem('admin_exp', data.expiresAt);
       navigate('/admin');
     } catch (err) {
       setError(err.message);
