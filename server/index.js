@@ -25,6 +25,20 @@ if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
 const PORT = process.env.PORT || 5000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
 
+// ── Database connection (cached for serverless) ───────────────
+let dbReady = false;
+
+async function connectDB() {
+  if (dbReady) return;
+  await mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    bufferCommands: false,
+  });
+  dbReady = true;
+  console.log('MongoDB connected');
+}
+
 const app = express();
 
 // ── Trust proxy (Vercel / Render / nginx sit in front) ───────
@@ -43,14 +57,13 @@ app.use(cors({ origin: CLIENT_ORIGIN, credentials: true, optionsSuccessStatus: 2
 app.use(cookieParser());
 
 // ── Body parsing ─────────────────────────────────────────────
-app.use('/api/admin/insights', express.json({ limit: '200kb' })); // insight body is HTML
-app.use(express.json({ limit: '16kb' }));   // prevent large payload attacks
+app.use('/api/admin/insights', express.json({ limit: '200kb' }));
+app.use(express.json({ limit: '16kb' }));
 
 // ── NoSQL injection sanitization ─────────────────────────────
 app.use(mongoSanitize());
 
 // ── Rate limiting ─────────────────────────────────────────────
-// General: 200 req / 15 min per IP
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -61,15 +74,22 @@ app.use(
   })
 );
 
-// Stricter limit on the inquiry (contact form) endpoint
 const inquiryLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 10,
   message: { message: 'Too many inquiries submitted. Please try again in an hour.' },
 });
 
-// ── Health check ─────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
+// ── Health check (no DB needed) ───────────────────────────────
+app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
+
+// ── Ensure DB is connected before any API route ───────────────
+app.use('/api', (_req, res, next) => {
+  connectDB().then(next).catch((err) => {
+    console.error('MongoDB connection failed:', err.message);
+    res.status(500).json({ message: 'Database unavailable.' });
+  });
+});
 
 // ── Routes ───────────────────────────────────────────────────
 app.use('/api/insights',       require('./routes/insights'));
@@ -79,41 +99,22 @@ app.use('/api/inquiries',      inquiryLimiter, require('./routes/inquiries'));
 app.use('/api/admin',          require('./routes/admin'));
 
 // ── 404 handler ──────────────────────────────────────────────
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({ message: 'Not found.' });
 });
 
 // ── Global error handler ─────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ message: 'An internal error occurred.' });
 });
 
-// ── Database connection (cached for serverless) ───────────────
-let dbConnected = false;
-
-async function connectDB() {
-  if (dbConnected) return;
-  await mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  });
-  dbConnected = true;
-  console.log('MongoDB connected');
-}
-
-// Ensure DB is connected before every request
-app.use((_req, res, next) => {
-  connectDB().then(next).catch((err) => {
-    console.error('MongoDB connection failed:', err.message);
-    res.status(500).json({ message: 'Database unavailable.' });
-  });
-});
-
 // ── Local dev: start HTTP server ──────────────────────────────
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  connectDB()
+    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+    .catch((err) => { console.error('MongoDB connection failed:', err.message); process.exit(1); });
 }
 
 module.exports = app;
