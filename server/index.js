@@ -27,6 +27,9 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
 
 const app = express();
 
+// ── Trust proxy (Vercel / Render / nginx sit in front) ───────
+app.set('trust proxy', 1);
+
 // ── Security headers ─────────────────────────────────────────
 app.use(helmet());
 
@@ -87,17 +90,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'An internal error occurred.' });
 });
 
-// ── Database & server start ───────────────────────────────────
-mongoose
-  .connect(MONGODB_URI, {
+// ── Database connection (cached for serverless) ───────────────
+let dbConnected = false;
+
+async function connectDB() {
+  if (dbConnected) return;
+  await mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
-  })
-  .then(() => {
-    console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error('MongoDB connection failed:', err.message);
-    process.exit(1);
   });
+  dbConnected = true;
+  console.log('MongoDB connected');
+}
+
+// Ensure DB is connected before every request
+app.use((_req, res, next) => {
+  connectDB().then(next).catch((err) => {
+    console.error('MongoDB connection failed:', err.message);
+    res.status(500).json({ message: 'Database unavailable.' });
+  });
+});
+
+// ── Local dev: start HTTP server ──────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
