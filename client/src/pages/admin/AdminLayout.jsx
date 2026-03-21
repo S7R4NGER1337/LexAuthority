@@ -12,7 +12,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   async function handleLogout() {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    await fetch(__API_URL__ + '/api/admin/logout', { method: 'POST', credentials: 'include' });
     localStorage.removeItem('admin_exp');
     navigate('/admin/login');
   }

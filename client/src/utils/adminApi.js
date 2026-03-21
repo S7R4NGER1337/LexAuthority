@@ -1,4 +1,5 @@
 const TIMEOUT_MS = 8000;
+const API_BASE = __API_URL__;
 
 export async function adminFetch(url, options = {}) {
   const controller = new AbortController();
@@ -7,7 +8,7 @@ export async function adminFetch(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(API_BASE + url, {
       ...options,
       headers,
       credentials: 'include',
